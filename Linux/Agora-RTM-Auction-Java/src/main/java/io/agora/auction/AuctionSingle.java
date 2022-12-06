@@ -117,9 +117,7 @@ public class AuctionSingle extends java.lang.Thread {
     }
 
     @Override
-    public void run() {
-
-        
+    public void run() { 
 
         String token = getToken();
 

@@ -1,9 +1,10 @@
 package io.agora.auction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Scanner;
-import java.io.FileOutputStream;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -64,7 +65,7 @@ public class AuctionMain {
 
     public static void main(String[] args) {
 
-        ArrayList<AuctionSingle> threads = new ArrayList<AuctionSingle>();
+        HashMap<String, AuctionSingle> threads = new HashMap<String, AuctionSingle>();
 
         AuctionMain main = new AuctionMain();
 
@@ -80,59 +81,8 @@ public class AuctionMain {
 
             at.start();
 
-            threads.add(at);
-
-            break;
+            threads.put(channelId, at);
         }
     }
 
-
-    // for dev
-    public static void main1(String[] args) {
-
-
-        String f = "setting.properties";
-        Properties props = new Properties();
-        try {
-            props.load(new java.io.FileInputStream(f));
-        }catch(Exception e)
-        {
-
-        }
- 
-        ArrayList<AuctionThread> threads = new ArrayList<AuctionThread>();
-
-        AuctionMain main = new AuctionMain();
-
-        main.requestChannels();
-
-        String[] channels = main.getChannels();
-
-        for(int i=0;i<channels.length;i++)
-        {
-            String channelId = channels[i];
- 
-            AuctionThread at = new AuctionThread(CONFIG.APP_ID, CONFIG.USER_ID, channelId);
-            
-            threads.add(at);
-            at.start();
-            try {
-                at.join();
-            }
-            catch(Exception err)
-            {
-                System.out.println(err.getMessage());
-            }
-            
-        }
-        
-        while (true) {
-           
-            for (AuctionThread thread : threads) {
-                 thread.checkMetadata();          
-            }
-           
-
-        }
-    }
 }
