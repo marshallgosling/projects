@@ -11,7 +11,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 // class CONFIG {
-//     public static final String APP_ID = "b751e95bce6c41dea55562cb027f0c61";
+//     public static final String APP_ID = "";
 //     public static final String USER_ID = "auction_admin_user";
 //     public static final String SERVER_IP = "192.168.1.3";
 //     public static final String REDIS_IP = "192.168.1.3";
@@ -21,7 +21,7 @@ import java.net.http.HttpResponse;
 // }
 
 class CONFIG {
-    public static final String APP_ID = "b751e95bce6c41dea55562cb027f0c61";
+    public static final String APP_ID = "";
     public static final String USER_ID = "auction_admin_user";
     public static final String SERVER_IP = "192.168.1.3";
     public static final String REDIS_IP = "127.0.0.1";
