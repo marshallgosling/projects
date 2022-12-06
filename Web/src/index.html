@@ -30,7 +30,7 @@
               </div>
               <div class="input-field">
                 <label for="accountName" class="active">Account Name</label>
-                <input type="text" placeholder="account name" name="accountName" value="migo">
+                <input type="text" placeholder="account name" name="accountName" value="">
               </div>
               <div class="input-field">
                 <label for="token" class="active">RTM Token (Optional)</label>
@@ -44,7 +44,10 @@
               </div>
               <div class="input-field">
                 <label for="channelName" class="active">Channel Name</label>
-                <input type="text" placeholder="channel name" name="channelName" value="hel">
+                <select name="channelName">
+                  <option value="" disabled selected>Choose your channel name</option>
+                  <option value="auction">auction</option>
+                </select>
               </div>
               <div class="row">
                 <div class="col s12">
@@ -60,7 +63,7 @@
 
 
               <div class="input-field">
-                <label for="peerId" class="active">Auctions</label>
+                <label for="auction" class="active">Auctions</label>
                 <input type="text" placeholder="Auction Id" name="auction">
                 <button class="btn btn-raised btn-primary waves-effect waves-light custom-btn-pin" disabled id="reload_action">RELOAD</button>
               </div>

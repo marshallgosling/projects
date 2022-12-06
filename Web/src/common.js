@@ -112,12 +112,3 @@ export function imageToBlob(src, cb){
   })
 }
 
-export function postBid(url, data) {
-  return fetch(url, {
-    method: 'post',
-    body: JSON.stringify(data),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-}
