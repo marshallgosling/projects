@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="agora_rtm">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/samples/Agora-RTM-Auction-Java/lib/agora_rtm.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

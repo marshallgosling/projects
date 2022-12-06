@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="target">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/samples/Agora-RTM-Auction-Java/target/RTM-Client-Demo-1.0-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/samples/Agora-RTM-Auction-Java/target/original-RTM-Auction-Demo-1.0-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/samples/Agora-RTM-Auction-Java/target/RTM-Auction-Demo-1.0-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/samples/Agora-RTM-Auction-Java/target/original-RTM-Client-Demo-1.0-SNAPSHOT.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
