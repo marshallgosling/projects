@@ -1,9 +1,5 @@
 # Agora Auction & Bidding Demo Tutorial
 
-*其他语言版本： [简体中文](README.zh.md)*
-
-The Agora Java RTM Tutorial is an open-source demo that will help you get message chat integrated directly into your Java applications using the Agora RTM SDK.
-
 With this demo app, you can:
 
 Client side:
