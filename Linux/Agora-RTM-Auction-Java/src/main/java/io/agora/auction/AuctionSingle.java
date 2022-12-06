@@ -154,17 +154,17 @@ public class AuctionSingle extends java.lang.Thread {
                 {
                     if (jedis.exists(key)) {
                         data = jedis.get(key);
-
-                        if (data.length() == 0)
-                        {
-                            continue;
-                        }
-
+                    }
+                    else {
+                        data = "";
+                    }
+                    if (data.length() > 0) {
                         jedis.set(key, "");
-
+                                 
                         writeLog("Read Metadata from Redis: "+data, Level.INFO);
 
                         sendChannelMetadata("auction", data);
+                                               
                     }
                     else {
                         sleep(100);
