@@ -2,33 +2,46 @@ package io.agora.auction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Scanner;
-
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-// class CONFIG {
-//     public static final String APP_ID = "b751e95bce6c41dea55562cb027f0c61";
-//     public static final String USER_ID = "auction_admin_user";
-//     public static final String SERVER_IP = "192.168.1.3";
-//     public static final String REDIS_IP = "192.168.1.3";
-//     public static final String REDIS_KEY = "AUCTION_CHANNEL_";
-//     public static final String BASE_URL = "http://192.168.1.3/";
-//     public static final String LOG_DIR = "/data/agora/logs/";
-// }
-
 class CONFIG {
-    public static final String APP_ID = "b751e95bce6c41dea55562cb027f0c61";
-    public static final String USER_ID = "auction_admin_user";
-    public static final String SERVER_IP = "192.168.1.3";
-    public static final String REDIS_IP = "127.0.0.1";
-    public static final String REDIS_KEY = "AUCTION_CHANNEL_";
-    public static final int REDIS_DB = 6;
-    public static final String BASE_URL = "http://www.yystory.co/";
-    public static final String LOG_DIR = "/data/agora/logs/";
+    public static String APP_ID = "";
+    public static String USER_ID = "";
+    public static String SERVER_IP = "192.168.1.3";
+    public static String REDIS_IP = "127.0.0.1";
+    public static String REDIS_KEY = "AUCTION_CHANNEL_";
+    public static int REDIS_DB = 6;
+    public static String BASE_URL = "";
+    public static String LOG_DIR = "/data/agora/logs/";
+
+    private static Properties prop;
+    private static String getProperty(String key)
+    {
+        System.out.println("get property:"+key + " value:"+prop.getProperty(key));
+        return prop.getProperty(key);
+    }
+    public static void setProperties(Properties properties) {
+        prop = properties;
+
+        APP_ID = getProperty("agora.appid");
+        USER_ID = getProperty("agora.userid");
+        REDIS_IP = getProperty("redis.ip");
+        REDIS_DB = Integer.parseInt(getProperty("redis.db"));
+        REDIS_KEY = getProperty("redis.key");
+        LOG_DIR = getProperty("logger.dir");
+        BASE_URL = getProperty("server.baseurl");
+        SERVER_IP = getProperty("server.ip");
+        
+    }
 }
 
 public class AuctionMain {
@@ -43,9 +56,6 @@ public class AuctionMain {
             HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
             String data = resp.body();
             channels = data.split("\n");
-
-            System.out.println("request channels succeed!");
-            
         }
         catch(Exception e)
         {
@@ -62,16 +72,33 @@ public class AuctionMain {
         return channels;
     }
 
+    private void initConfig() {
+        Properties prop =new Properties();
+       
+        try {
+            InputStream inputstream = AuctionMain.class.getClassLoader().getResourceAsStream( "io/agora/auction/agora.properties" );
+            
+            prop.load(inputstream);
+            
+        }
+        catch(IOException e)
+        {
+        }
+
+        CONFIG.setProperties(prop);
+
+        
+    }
 
     public static void main(String[] args) {
 
-        HashMap<String, AuctionSingle> threads = new HashMap<String, AuctionSingle>();
-
         AuctionMain main = new AuctionMain();
-
+        main.initConfig();
         main.requestChannels();
 
         String[] channels = main.getChannels();
+
+        HashMap<String, AuctionSingle> threads = new HashMap<String, AuctionSingle>();
 
         for(int i=0;i<channels.length;i++)
         {

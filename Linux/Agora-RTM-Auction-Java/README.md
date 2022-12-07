@@ -16,12 +16,18 @@ With this sample app, you can:
 
 ## Running the App
 First, create a developer account at [Agora.io](https://dashboard.agora.io/signin/), and obtain an App ID.
-Update APPID.APP_ID of RtmJavaDemo.java with your App ID .
+Update agora.appid of agora.properties with your App ID .
 
 ```
-public static final String APP_ID = "<#YOUR APP ID#>";
+
+agora.appid=#YOUR APP ID
+
+server.baseurl=#Your Server URI
+
+redis.ip=#Your redis ip
 
 ```
+
 ## Integration mode
 - Step 1: Download the RTM SDK in Agora.io SDK. After decompressing, copy the *.jar and *.so under the LIBS folder to the lib/ of this project.
 - Step 2: Install the dependency jar package which demo required into maven local repo, use maven command "mvn install:install-file -Dfile=lib/agora_rtm.jar -DgroupId=io.agora.rtm  -DartifactId=agora-rtm-sdk -Dversion=1.0 -Dpackaging=jar".
