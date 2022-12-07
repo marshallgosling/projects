@@ -37,6 +37,7 @@ Create a developer account at [Agora.io](https://dashboard.agora.io/signin/), an
 - **Method** GET
 - **Params** uid
 - **String Response** token string
+  
 | Param | Type | Definitioin |
 | ----- | ----- | ----- |
 | uid | string | Username |
