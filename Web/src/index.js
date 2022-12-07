@@ -46,10 +46,13 @@ $(() => {
     if (newState === 'ABORTED') {
       if (reason === 'REMOTE_LOGIN') {
         Toast.error('You have already been kicked off!')
-        $('#accountName').text('Agora Chatroom')
 
-        $('#dialogue-list')[0].innerHTML = ''
-        $('#chat-message')[0].innerHTML = ''
+        $("#logout").attr('disabled', 'disabled');
+        $("#login").removeAttr('disabled');
+        $("#leave").attr('disabled', 'disabled');
+        $("#join").removeAttr('disabled');
+        const params = serializeFormData('loginForm')
+        rtm.channels[params.channelName].joined = false
       }
     }
   })
