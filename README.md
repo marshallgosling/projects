@@ -24,6 +24,10 @@ Create a developer account at [Agora.io](https://dashboard.agora.io/signin/), an
 - Server deploy
 - Website demo
 - Linux bin file
+
+## Server Management & Dashboard demo
+[Auction Server](https://github.com/marshallgosling/auction_server), this is a backup application using PHP Laravel.
+
   
 ## Integration
 
