@@ -77,7 +77,7 @@ public class AuctionMain {
         {
             String channelId = channels[i];
 
-            AuctionSingle at = new AuctionSingle(CONFIG.APP_ID, CONFIG.USER_ID, channelId);
+            AuctionSingle at = new AuctionSingle(CONFIG.APP_ID, CONFIG.USER_ID+"_"+channelId, channelId);
 
             at.start();
 
