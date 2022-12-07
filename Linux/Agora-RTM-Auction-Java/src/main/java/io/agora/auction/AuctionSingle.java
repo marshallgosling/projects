@@ -50,9 +50,10 @@ public class AuctionSingle extends java.lang.Thread {
         userId = userid;
         channelId = channelid;
         key = CONFIG.REDIS_KEY + channelId;
-        writeLog("Init thread with channelid: "+channelId, Level.INFO);    
-        
+
         initLog();
+
+        writeLog("Init thread with channelid: "+channelId, Level.INFO);
 
         try {
             jedis = new Jedis(CONFIG.REDIS_IP, 6379);
@@ -159,7 +160,7 @@ public class AuctionSingle extends java.lang.Thread {
                         if (data.length() > 0) {                      
                             writeLog("Read Metadata from Redis: "+data, Level.INFO);
     
-                            sendChannelMetadata("auction", data);
+                            syncChannelMetadata("auction", data);
                         }
                     }
                     else {
@@ -237,34 +238,66 @@ public class AuctionSingle extends java.lang.Thread {
         return true;
     }
 
-    private void sendChannelMetadata(String key, String data) {
-
+    private void syncChannelMetadata(String key, String data) {
         RtmMetadata metadata = channelListener.metadata;
-
-        for (RtmMetadataItem item : metadata.items) {
-            if (item.getKey().equals(key)) {
-                item.setValue(data);
-            }
-        }
-
         RtmMetadataOptions options = new RtmMetadataOptions();
         options.setEnableRecordTs(true);
         options.setEnableRecordUserId(true);
 
-        writeLog("Start Send Metadata.", Level.INFO);
-        mRtmChannel.updateChannelMetadata(metadata.items, options, new ResultCallback<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                writeLog("Send Metadata Succeed", Level.INFO);
+        
+        if (metadata.items.isEmpty()) {
+            RtmMetadataItem item  = new RtmMetadataItem();
+            item.setKey(key);
+            item.setValue(data);
+
+            metadata.items.add(item);   
+
+            mRtmChannel.addChannelMetadata(metadata.items, options, new ResultCallback<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    writeLog("add Metadata Succeed", Level.INFO);
+                }
+
+                @Override
+                public void onFailure(ErrorInfo errorInfo) {
+                    final String errorCode = errorInfo.getErrorDescription();
+
+                    writeLog("Add Metadata to channel failed, erroCode = " + errorCode, Level.SEVERE);
+                }
+            });
+        }
+        else {
+            boolean found = false;
+            for (RtmMetadataItem item : metadata.items) {
+                if (item.getKey().equals(key)) {
+                    item.setValue(data);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                RtmMetadataItem item  = new RtmMetadataItem();
+                item.setKey(key);
+                item.setValue(data);
+
+                metadata.items.add(item);     
             }
 
-            @Override
-            public void onFailure(ErrorInfo errorInfo) {
-                final int errorCode = errorInfo.getErrorCode();
-                writeLog("Send Metadata to channel failed, erroCode = " + errorCode, Level.WARNING);
-            }
-        });
-    } 
+            mRtmChannel.updateChannelMetadata(metadata.items, options, new ResultCallback<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    writeLog("Update Metadata Succeed", Level.INFO);
+                }
+
+                @Override
+                public void onFailure(ErrorInfo errorInfo) {
+                    final String errorCode = errorInfo.getErrorDescription();
+
+                    writeLog("Update Metadata to channel failed, erroCode = " + errorCode, Level.SEVERE);
+                }
+            });
+        }
+    }
 }
 
 class LaravelFormatter extends Formatter {
