@@ -1,9 +1,6 @@
 package io.agora.auction;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+
 import java.text.SimpleDateFormat;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -40,7 +37,9 @@ public class AuctionSingle extends java.lang.Thread {
 
     private boolean exitCode = false;
     private MyChannelListener channelListener;
+    private MyClientListener clientListener;
     private Logger logger;
+    
     private boolean ready = false;
 
     private String key;
@@ -65,7 +64,11 @@ public class AuctionSingle extends java.lang.Thread {
             throw new RuntimeException("Need to check redis password");
         }
         try {
-            mRtmClient = RtmClient.createInstance(appId, new MyClientListener());
+            clientListener = new MyClientListener();
+            mRtmClient = RtmClient.createInstance(appId, clientListener);
+            clientListener.baseUrl = baseUrl;
+            clientListener.userId = userId;
+            clientListener.rtmClient = mRtmClient;
             writeLog("Rtm sdk init succeed!", Level.INFO);
         }
         catch (Exception e) {
@@ -119,7 +122,7 @@ public class AuctionSingle extends java.lang.Thread {
     @Override
     public void run() { 
 
-        String token = getToken();
+        String token = clientListener.getToken();
 
         writeLog("Rtm login start!", Level.INFO);
         login(token);
@@ -146,23 +149,18 @@ public class AuctionSingle extends java.lang.Thread {
         if (loginStatus && channelStatus) {
             String data;
 
-            writeLog("Ready for Redis key metadata:"+key, Level.INFO);
+            writeLog("Waiting for Redis key metadata:"+key, Level.INFO);
             try {
                 while(!exitCode)
                 {
                     if (jedis.exists(key)) {
                         data = jedis.get(key);
-                    }
-                    else {
-                        data = "";
-                    }
-                    if (data.length() > 0) {
-                        jedis.set(key, "");
-                                 
-                        writeLog("Read Metadata from Redis: "+data, Level.INFO);
-
-                        sendChannelMetadata("auction", data);
-                                               
+                        jedis.del(key);
+                        if (data.length() > 0) {                      
+                            writeLog("Read Metadata from Redis: "+data, Level.INFO);
+    
+                            sendChannelMetadata("auction", data);
+                        }
                     }
                     else {
                         sleep(100);
@@ -181,19 +179,7 @@ public class AuctionSingle extends java.lang.Thread {
         logout();
     }
 
-    private String getToken() {
-        HttpClient client = HttpClient.newBuilder().build();
-        HttpRequest req = HttpRequest.newBuilder(URI.create(baseUrl+userId)).build();
-        try {
-            HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
-            return resp.body();
-        }
-        catch(Exception e)
-        {
-            throw new RuntimeException("Request Token error.");
-        }
-
-    }
+    
 
     private boolean login(String token) {
 
