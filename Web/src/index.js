@@ -16,6 +16,27 @@ $(() => {
 
   const rtm = new RtmClient()
 
+  fetch("/api/v1/channels", {
+    method: 'get'
+  }).then((response) => {
+    return response.json();
+  }).then((data) => {
+    console.log(data)
+    if(data.result && data.result.length > 0) {
+      
+      for(var i=0;i<data.result.length;i++) {
+        let item = data.result[i];
+        console.log("option "+item.channelid)
+        var $newOpt = $("<option>").attr("value",item.channelid).text(item.channelid)
+        $("#mySelect").append($newOpt);
+      }
+
+      var elems = document.querySelectorAll('select');
+      M.FormSelect.init(elems);
+    }
+    
+  })
+
   rtm.on('ConnectionStateChanged', (newState, reason) => {
     console.log('reason', reason)
     const view = $('<div/>', {
@@ -121,7 +142,7 @@ $(() => {
 
       let auction = auctions[i]
 
-      $('<div class="col s4 m7">'+
+      $('<div class="col s4 m5">'+
       '<div class="card">'+
       '  <div class="card-image">'+
       '    <img src="/storage/' + auction.cover + '">'+
