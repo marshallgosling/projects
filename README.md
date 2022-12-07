@@ -29,8 +29,17 @@ Create a developer account at [Agora.io](https://dashboard.agora.io/signin/), an
 
 ### API Documents
 
+- **/api/v1/rtmtoken** Get RTM token
 - **/api/v1/auction/bid** Post bid action
 - **/api/v1/auction** Get auction data list
+
+#### /api/v1/rtmtoken
+- **Method** GET
+- **Params** uid
+- **String Response** token string
+| Param | Type | Definitioin |
+| ----- | ----- | ----- |
+| uid | string | Username |
 
 #### /api/v1/auction/bid
 
