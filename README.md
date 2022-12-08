@@ -33,9 +33,27 @@ Create a developer account at [Agora.io](https://dashboard.agora.io/signin/), an
 
 ### API Documents
 
-- **/api/v1/rtmtoken** Get RTM token
-- **/api/v1/auction/bid** Post bid action
-- **/api/v1/auction** Get auction data list
+Demo baseurl: https://yystory.co
+Image baseurl: http://yystory.co/storage/
+
+- **/api/v1/channels**     Get channel data list
+- **/api/v1/rtmtoken**     Get RTM token
+- **/api/v1/auction/bid**     Post bid action
+- **/api/v1/auction**       Get auction data list
+
+
+#### /api/v1/channels
+- **Method** GET
+- **Params** n/a
+- **JSON Response** {result:[{id,channelid,status,owner,appid,...}]}
+  
+| Param | Type | Definitioin |
+| ----- | ----- | ----- |
+| id | int | Primary key |
+| channelid | String | RTM Channel ID (name) |
+| status | int | 1: Online, 2: Offline |
+| appid | String | RTM appid |
+| owner | String | Owner Name | 
 
 #### /api/v1/rtmtoken
 - **Method** GET
