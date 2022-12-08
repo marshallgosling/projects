@@ -58,7 +58,7 @@ Image baseurl: http://yystory.co/storage/
 #### /api/v1/rtmtoken
 - **Method** GET
 - **Params** uid
-- **String Response** token string
+- **JSON Response** {result: "token string"}
   
 | Param | Type | Definitioin |
 | ----- | ----- | ----- |
@@ -83,7 +83,7 @@ Image baseurl: http://yystory.co/storage/
 
 - **Method** GET
 - **Params** channelid
-- **JSON Response** [{ id, name, cover, channelid, status, ... }...]
+- **JSON Response** {result: [{ id, name, cover, channelid, status, ... }...]}
 
 | Param | Type | Definitioin |
 | ----- | ----- | ----- |
