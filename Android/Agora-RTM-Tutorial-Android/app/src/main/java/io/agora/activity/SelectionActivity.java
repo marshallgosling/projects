@@ -10,10 +10,8 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.widget.AppCompatCheckBox;
-
 import io.agora.rtmtutorial.AGApplication;
-import io.agora.rtmtutorial.ChatManager;
+import io.agora.rtmtutorial.ClientManager;
 import io.agora.rtmtutorial.R;
 import io.agora.utils.MessageUtil;
 
@@ -28,7 +26,7 @@ public class SelectionActivity extends Activity {
     private String mTargetName;
     private String mUserId;
 
-    private ChatManager mChatManager;
+    private ClientManager mChatManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

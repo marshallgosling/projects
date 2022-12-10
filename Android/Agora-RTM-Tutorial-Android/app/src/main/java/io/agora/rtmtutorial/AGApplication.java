@@ -4,7 +4,7 @@ import android.app.Application;
 
 public class AGApplication extends Application {
     private static AGApplication sInstance;
-    private ChatManager mChatManager;
+    private ClientManager mChatManager;
 
 
     public static AGApplication the() {
@@ -16,11 +16,11 @@ public class AGApplication extends Application {
         super.onCreate();
         sInstance = this;
 
-        mChatManager = new ChatManager(this);
+        mChatManager = new ClientManager(this);
         mChatManager.init();
     }
 
-    public ChatManager getChatManager() {
+    public ClientManager getChatManager() {
         return mChatManager;
     }
 }

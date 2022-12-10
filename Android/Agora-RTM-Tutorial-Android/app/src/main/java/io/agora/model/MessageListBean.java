@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.agora.rtm.RtmMessage;
-import io.agora.rtmtutorial.ChatManager;
+import io.agora.rtmtutorial.ClientManager;
 
 public class MessageListBean {
     private String accountOther;
@@ -21,7 +21,7 @@ public class MessageListBean {
      * @param account     peer user id to find offline messages from
      * @param chatManager chat manager that managers offline message pool
      */
-    public MessageListBean(String account, ChatManager chatManager) {
+    public MessageListBean(String account, ClientManager chatManager) {
         accountOther = account;
         messageBeanList = new ArrayList<>();
 

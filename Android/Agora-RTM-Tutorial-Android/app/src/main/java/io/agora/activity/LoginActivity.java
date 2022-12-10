@@ -17,7 +17,7 @@ import io.agora.rtm.ErrorInfo;
 import io.agora.rtm.ResultCallback;
 import io.agora.rtm.RtmClient;
 import io.agora.rtmtutorial.AGApplication;
-import io.agora.rtmtutorial.ChatManager;
+import io.agora.rtmtutorial.ClientManager;
 import io.agora.rtmtutorial.R;
 import io.agora.utils.MessageUtil;
 import okhttp3.Call;
@@ -31,10 +31,12 @@ public class LoginActivity extends Activity {
 
     private TextView mLoginBtn;
     private EditText mUserIdEditText;
+    private EditText mChannelEditText;
     private String mUserId;
+    private String mChannelName;
 
-    private RtmClient mRtmClient;
     private boolean mIsInChat = false;
+    private ClientManager mChatManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +45,14 @@ public class LoginActivity extends Activity {
 
         mUserIdEditText = findViewById(R.id.user_id);
         mLoginBtn = findViewById(R.id.button_login);
+        mChannelEditText = findViewById(R.id.channel_name);
+        mChatManager = AGApplication.the().getChatManager();
 
-        ChatManager mChatManager = AGApplication.the().getChatManager();
-        mRtmClient = mChatManager.getRtmClient();
     }
 
     public void onClickLogin(View v) {
         mUserId = mUserIdEditText.getText().toString();
+        mChannelName = mChannelEditText.getText().toString();
         if (mUserId.equals("")) {
             showToast(getString(R.string.account_empty));
         } else if (mUserId.length() > MessageUtil.MAX_INPUT_NAME_LENGTH) {
@@ -58,9 +61,15 @@ public class LoginActivity extends Activity {
             showToast(getString(R.string.account_starts_with_space));
         } else if (mUserId.equals("null")) {
             showToast(getString(R.string.account_literal_null));
-        } else {
+        } else if (mChannelName.length() == 0) {
+            showToast(getString(R.string.channel_name_empty));
+        }
+        else {
             mLoginBtn.setEnabled(false);
             //doLogin();
+            mChatManager.setUserId(mUserId);
+
+
             getToken();
         }
     }
@@ -75,10 +84,8 @@ public class LoginActivity extends Activity {
     }
 
     private void getToken() {
-        OkHttpClient client = new OkHttpClient();
-        Request req = new Request.Builder().url("http://192.168.1.9/api/v1/rtmtoken?uid="+mUserId).build();
-        Log.i(TAG, "http://10.82.103.226/api/v1/rtmtoken?uid="+mUserId);
-        client.newCall(req).enqueue(new Callback() {
+        Log.i(TAG, "test is here");
+        mChatManager.getToken(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.i(TAG, "get token failed "+ e.getMessage());
@@ -104,15 +111,15 @@ public class LoginActivity extends Activity {
     private void doLogin(String token) {
         mIsInChat = true;
         //String token = getString(R.string.agora_token);
-
-
-        mRtmClient.login(token, mUserId, new ResultCallback<Void>() {
+        mChatManager.doLogin(token, new ResultCallback<Void>() {
             @Override
             public void onSuccess(Void responseInfo) {
                 Log.i(TAG, "login success");
+                mChatManager.isLogin = true;
                 runOnUiThread(() -> {
-                    Intent intent = new Intent(LoginActivity.this, SelectionActivity.class);
+                    Intent intent = new Intent(LoginActivity.this, AuctionActivity.class);
                     intent.putExtra(MessageUtil.INTENT_EXTRA_USER_ID, mUserId);
+                    intent.putExtra(MessageUtil.INTENT_EXTRA_CHANNEL_NAME, mChannelName);
                     startActivity(intent);
                 });
             }
@@ -120,6 +127,7 @@ public class LoginActivity extends Activity {
             @Override
             public void onFailure(ErrorInfo errorInfo) {
                 Log.i(TAG, "login failed: " + errorInfo.getErrorCode());
+                mChatManager.isLogin = false;
                 runOnUiThread(() -> {
                     mLoginBtn.setEnabled(true);
                     mIsInChat = false;
@@ -133,7 +141,8 @@ public class LoginActivity extends Activity {
      * API CALL: logout from RTM server
      */
     private void doLogout() {
-        mRtmClient.logout(null);
+        mChatManager.doLogout(null);
+        mChatManager.isLogin = false;
         MessageUtil.cleanMessageListBeanList();
     }
 

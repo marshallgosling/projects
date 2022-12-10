@@ -2,9 +2,7 @@ package io.agora.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -15,7 +13,6 @@ import android.widget.Toast;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.text.MessageFormat;
@@ -40,9 +37,8 @@ import io.agora.rtm.RtmMetadata;
 import io.agora.rtm.RtmMetadataOptions;
 import io.agora.rtm.RtmStatusCode;
 import io.agora.rtmtutorial.AGApplication;
-import io.agora.rtmtutorial.ChatManager;
+import io.agora.rtmtutorial.ClientManager;
 import io.agora.rtmtutorial.R;
-import io.agora.utils.ImageUtil;
 import io.agora.utils.MessageUtil;
 
 public class MessageActivity extends Activity {
@@ -61,7 +57,7 @@ public class MessageActivity extends Activity {
     private String mChannelName = "";
     private int mChannelMemberCount = 1;
 
-    private ChatManager mChatManager;
+    private ClientManager mChatManager;
     private RtmClient mRtmClient;
     private RtmClientListener mClientListener;
     private RtmChannel mRtmChannel;
@@ -264,6 +260,7 @@ public class MessageActivity extends Activity {
 
             @Override
             public void onFailure(ErrorInfo errorInfo) {
+                errorInfo.getErrorDescription();
                 Log.e(TAG, "failed to get channel members, err: " + errorInfo.getErrorCode());
             }
         });
@@ -271,6 +268,7 @@ public class MessageActivity extends Activity {
 
     private void sendChannelMetadata(RtmMetadata metadata, RtmMetadataOptions options) {
         Log.e(TAG, "deleteChannelMetadata");
+
         mRtmChannel.deleteChannelMetadata(metadata.items, options, null );
     }
 

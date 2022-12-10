@@ -18,6 +18,7 @@ public class MessageUtil {
     public static final String INTENT_EXTRA_IS_PEER_MODE = "chatMode";
     public static final String INTENT_EXTRA_USER_ID = "userId";
     public static final String INTENT_EXTRA_TARGET_NAME = "targetName";
+    public static final String INTENT_EXTRA_CHANNEL_NAME = "channelName";
 
     public static Random RANDOM = new Random();
 

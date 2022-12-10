@@ -32,12 +32,25 @@
         android:id="@+id/user_id"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:layout_above="@+id/button_login"
+        android:layout_above="@+id/channel_name"
         android:hint="@string/str_account"
         android:layout_marginLeft="80dp"
         android:layout_marginRight="80dp"
         android:layout_marginBottom="25dp"
         android:background="@color/white"
+        android:lines="1"
+        android:padding="5dp" />
+
+    <EditText
+        android:id="@+id/channel_name"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_above="@+id/button_login"
+        android:layout_marginLeft="80dp"
+        android:layout_marginRight="80dp"
+        android:layout_marginBottom="25dp"
+        android:background="@color/white"
+        android:hint="@string/hint_channel"
         android:lines="1"
         android:padding="5dp" />
 </RelativeLayout>

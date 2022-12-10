@@ -13,16 +13,17 @@ import io.agora.rtm.RtmMessage;
 import io.agora.rtm.RtmMetadata;
 import io.agora.rtm.SendMessageOptions;
 
-public class ChatManager {
-    private static final String TAG = ChatManager.class.getSimpleName();
+public class ChannelManager {
+    private static final String TAG = ChannelManager.class.getSimpleName();
 
     private Context mContext;
     private RtmClient mRtmClient;
     private SendMessageOptions mSendMsgOptions;
     private List<RtmClientListener> mListenerList = new ArrayList<>();
     private RtmMessagePool mMessagePool = new RtmMessagePool();
+    private RtmMetadata mMetadata;
 
-    public ChatManager(Context context) {
+    public ChannelManager(Context context) {
         mContext = context;
     }
 
@@ -69,7 +70,7 @@ public class ChatManager {
 
                 @Override
                 public void onUserMetadataUpdated(String s, RtmMetadata rtmMetadata) {
-
+                    mMetadata = rtmMetadata;
                 }
             });
 
@@ -104,6 +105,16 @@ public class ChatManager {
 
     public List<RtmMessage> getAllOfflineMessages(String peerId) {
         return mMessagePool.getAllOfflineMessages(peerId);
+    }
+
+    public RtmMetadata getMetadata()
+    {
+        return mMetadata;
+    }
+
+    public void syncRtmMetadata(RtmMetadata metadata)
+    {
+
     }
 
     public void removeAllOfflineMessages(String peerId) {
