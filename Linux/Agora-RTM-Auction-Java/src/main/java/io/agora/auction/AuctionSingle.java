@@ -9,6 +9,8 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.Date;
+import java.util.HashMap;
+
 import io.agora.rtm.RtmClient;
 
 import io.agora.rtm.RtmMetadata;
@@ -18,12 +20,22 @@ import io.agora.rtm.ErrorInfo;
 import io.agora.rtm.ResultCallback;
 import io.agora.rtm.RtmChannel;
 
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Locale.Category;
 
 import redis.clients.jedis.Jedis;
 
 public class AuctionSingle extends java.lang.Thread {
 
-    private String baseUrl =  CONFIG.BASE_URL + "api/v1/rtmtoken?uid=";
+    private String rtmTokenUrl =  CONFIG.BASE_URL + "api/v1/rtmtoken?nojson=1&uid=";
+    private String channelUrl = CONFIG.BASE_URL + "api/v1/channel/";
+    private String syncUrl = CONFIG.BASE_URL + "api/v1/auction/sync";
 
     private Jedis jedis;
     private String appId;
@@ -33,14 +45,18 @@ public class AuctionSingle extends java.lang.Thread {
     private RtmClient mRtmClient;
     private RtmChannel mRtmChannel;
     private boolean loginStatus = false;
-    private boolean channelStatus = false;
+    private boolean joinStatus = false;
 
     private boolean exitCode = false;
     private MyChannelListener channelListener;
     private MyClientListener clientListener;
     private Logger logger;
-    
-    private boolean ready = false;
+    HttpClient client;
+    HttpRequest req;
+    private int failedLoginCount = 0;
+    private int lastCheckTime = 0;
+
+    private String channelStatus = "";
 
     private String key;
 
@@ -55,6 +71,9 @@ public class AuctionSingle extends java.lang.Thread {
 
         writeLog("Init thread with channelid: "+channelId, Level.INFO);
 
+        client = HttpClient.newBuilder().build();
+        req = HttpRequest.newBuilder(URI.create(channelUrl+channelId)).build();
+
         try {
             jedis = new Jedis(CONFIG.REDIS_IP, 6379);
             jedis.select(CONFIG.REDIS_DB);
@@ -67,7 +86,7 @@ public class AuctionSingle extends java.lang.Thread {
         try {
             clientListener = new MyClientListener();
             mRtmClient = RtmClient.createInstance(appId, clientListener);
-            clientListener.baseUrl = baseUrl;
+            clientListener.baseUrl = rtmTokenUrl;
             clientListener.userId = userId;
             clientListener.rtmClient = mRtmClient;
             writeLog("Rtm sdk init succeed!", Level.INFO);
@@ -86,8 +105,9 @@ public class AuctionSingle extends java.lang.Thread {
             logger = Logger.getLogger("agora-"+channelId);
             
             //日志处理器
-            
-            FileHandler fileHandler = new FileHandler(CONFIG.LOG_DIR + "channel_" + channelId + ".log");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-dd");
+            String date = simpleDateFormat.format(new Date());
+            FileHandler fileHandler = new FileHandler(CONFIG.LOG_DIR + "channel_" + channelId + "_" + date + ".log", true);
         
             fileHandler.setFormatter(new LaravelFormatter());
             
@@ -122,57 +142,66 @@ public class AuctionSingle extends java.lang.Thread {
 
     @Override
     public void run() { 
+        String data;
+        while (!exitCode) {
+            if (isOffline()) {
 
-        String token = clientListener.getToken();
-
-        writeLog("Rtm login start!", Level.INFO);
-        login(token);
-        try {
-            sleep(1000);
-        }
-        catch (Exception e) {
-
-            throw new RuntimeException("sleep error");
-        }
-
-        writeLog("Rtm join channel start!", Level.INFO);
-        joinChannel();
-
-        try {
-            sleep(1000);
-        }
-        catch (Exception e) {
-
-            throw new RuntimeException("sleep error");
-        }
-
-
-        if (loginStatus && channelStatus) {
-            String data;
-
-            writeLog("Waiting for Redis key metadata:"+key, Level.INFO);
-            try {
-                while(!exitCode)
+                if (loginStatus || joinStatus) {
+                    writeLog("Channel "+channelId+" is offline. so logout.", Level.INFO);
+                    logout();
+                }
+                try {
+                    sleep(5000);
+                }
+                catch(Exception e)
                 {
-                    if (jedis.exists(key)) {
-                        data = jedis.get(key);
-                        jedis.del(key);
-                        if (data.length() > 0) {                      
-                            writeLog("Read Metadata from Redis: "+data, Level.INFO);
-    
-                            syncChannelMetadata("auction", data);
-                        }
-                    }
-                    else {
-                        sleep(100);
-                    }
 
                 }
             }
-            catch (Exception e) {
+            else {
+                if (!channelStatus.equals("online")) continue;
 
-                throw new RuntimeException("Redis function error."+e.getMessage());
+                if (!loginStatus) {
+                    writeLog("Channel "+channelId+" is online. Start login.", Level.INFO);
+                    startRTM();
+                    writeLog("Waiting for Redis key metadata:"+key, Level.INFO);
+                    if(loginStatus && joinStatus) {
+                        syncAuction(channelId, "1");
+                    }
+                }
+
+                if(loginStatus && joinStatus) {
+                    
+                    try {
+                        data = jedis.get(key);
+                        jedis.set(key, "");
+                        if (data.length() > 0) {                      
+                            writeLog("Read Metadata from Redis: "+data, Level.INFO);
+                
+                            syncChannelMetadata("auction", data);
+                        }                       
+                        else {
+                            sleep(100);
+                        }       
+                    }
+                    catch (Exception e) {
+            
+                    }
+                }
+                else {
+                    failedLoginCount += 1;
+
+                    if (failedLoginCount == 10) {
+                        writeLog("Failed login times over 10:", Level.SEVERE);
+                    
+                        break;
+                    }
+                }
+
+                
+        
             }
+
 
         }
 
@@ -180,6 +209,81 @@ public class AuctionSingle extends java.lang.Thread {
         logout();
     }
 
+    private void startRTM() {
+        String token = clientListener.getToken();
+
+        writeLog("Rtm login start!", Level.INFO);
+        login(token);
+        try {
+            sleep(1000);
+        }
+        catch (Exception e) {}
+
+        writeLog("Rtm join channel start!", Level.INFO);
+        joinChannel();
+
+        try {
+            sleep(1000);
+        }
+        catch (Exception e) {}
+
+
+    }
+
+    private boolean isOffline()
+    {
+        if (lastCheckTime > 0) {
+            lastCheckTime --;
+            return false;
+        }
+        lastCheckTime = 10;
+        try {
+            HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+            String body = resp.body().trim();
+            channelStatus = body;
+            return !body.equals("online");
+        }
+        catch(Exception e)
+        {
+            return false;
+        }
+    }
+
+    private void syncAuction(String channelid, String status)
+    {
+        Map<String, String> data = new HashMap<String, String>();
+        data.put("channelid", channelid);
+        data.put("status", status);
+        try {
+            HttpRequest sync = HttpRequest.newBuilder(URI.create(syncUrl))
+            .POST(buildFormDataFromMap(data))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .build();
+
+            client.send(sync, HttpResponse.BodyHandlers.ofString());
+            
+            
+        }catch(Exception e)
+        {
+
+        }
+
+    }
+
+    private static HttpRequest.BodyPublisher buildFormDataFromMap(Map<String, String> data)
+    {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<String, String> entry: data.entrySet()) {
+            if (builder.length() > 0) {
+                builder.append("&");
+            }
+            builder.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
+            builder.append("=");
+            builder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
+        }
+
+        return HttpRequest.BodyPublishers.ofString(builder.toString());
+    }
     
 
     private boolean login(String token) {
@@ -200,8 +304,8 @@ public class AuctionSingle extends java.lang.Thread {
     }
 
     public void logout() {
-        if(channelStatus) {
-            channelStatus = false;
+        if(joinStatus) {
+            joinStatus = false;
             mRtmChannel.leave(null);
             mRtmChannel.release();
         }
@@ -209,7 +313,7 @@ public class AuctionSingle extends java.lang.Thread {
         if(loginStatus) {
             loginStatus = false;
             mRtmClient.logout(null);
-            mRtmClient.release();
+            //mRtmClient.release();
         }
 
     }
@@ -225,13 +329,13 @@ public class AuctionSingle extends java.lang.Thread {
             @Override
             public void onSuccess(Void responseInfo) {
                 writeLog("join channel success!", Level.INFO);
-                channelStatus = true;
+                joinStatus = true;
             }
 
             @Override
             public void onFailure(ErrorInfo errorInfo) {
                 writeLog("join channel failure! errorCode = " + errorInfo.getErrorCode(), Level.WARNING);
-                channelStatus = false;
+                joinStatus = false;
             }
         });
 

@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -73,21 +74,24 @@ public class AuctionMain {
     }
 
     private void initConfig() {
-        Properties prop =new Properties();
-       
+        Properties prop = new Properties();
+        FileReader f = null;
         try {
-            InputStream inputstream = AuctionMain.class.getClassLoader().getResourceAsStream( "io/agora/auction/agora.properties" );
+            f = new FileReader(System.getProperty("user.dir")+"/agora.properties");
+      
+            prop.load(f);
+
+            f.close();
             
-            prop.load(inputstream);
-            
+            CONFIG.setProperties(prop);
+
         }
         catch(IOException e)
         {
+            System.out.println("File agora.properties is missing.");
+            
         }
-
-        CONFIG.setProperties(prop);
-
-        
+  
     }
 
     public static void main(String[] args) {
