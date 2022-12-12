@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string translatable="false" name="agora_app_id">b751e95bce6c41dea55562cb027f0c61</string>
-    <string translatable="false" name="agora_server">https://yystory.co</string>
-    <!--string translatable="false" name="agora_server">http://10.82.103.226</string>-->
+    <string translatable="false" name="agora_app_id"></string>
+    <string translatable="false" name="agora_server"></string>
 </resources>
