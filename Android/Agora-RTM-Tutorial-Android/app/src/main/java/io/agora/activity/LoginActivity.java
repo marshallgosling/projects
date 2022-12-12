@@ -5,13 +5,19 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.util.ArrayList;
 
 import io.agora.rtm.ErrorInfo;
 import io.agora.rtm.ResultCallback;
@@ -31,7 +37,7 @@ public class LoginActivity extends Activity {
 
     private TextView mLoginBtn;
     private EditText mUserIdEditText;
-    private EditText mChannelEditText;
+    private Spinner mChannelEditText;
     private String mUserId;
     private String mChannelName;
 
@@ -45,14 +51,17 @@ public class LoginActivity extends Activity {
 
         mUserIdEditText = findViewById(R.id.user_id);
         mLoginBtn = findViewById(R.id.button_login);
-        mChannelEditText = findViewById(R.id.channel_name);
+        mChannelEditText = (Spinner) findViewById(R.id.channel_name);
         mChatManager = AGApplication.the().getChatManager();
+        mChannelEditText.setEnabled(false);
+        mLoginBtn.setEnabled(false);
 
+        getChannelNameList();
     }
 
     public void onClickLogin(View v) {
         mUserId = mUserIdEditText.getText().toString();
-        mChannelName = mChannelEditText.getText().toString();
+        mChannelName = mChannelEditText.getSelectedItem().toString();
         if (mUserId.equals("")) {
             showToast(getString(R.string.account_empty));
         } else if (mUserId.length() > MessageUtil.MAX_INPUT_NAME_LENGTH) {
@@ -83,8 +92,47 @@ public class LoginActivity extends Activity {
         }
     }
 
+    private void getChannelNameList() {
+        Log.i(TAG, "get channel is here");
+        mChatManager.getChannelNameList(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                runOnUiThread(() -> {
+                    setupChannelSelector(new ArrayList<>());
+                });
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                ArrayList<String> channels = new ArrayList<>();
+                try {
+                    JSONObject json = new JSONObject(response.body().string());
+                    JSONArray list = json.getJSONArray("result");
+                    for(int i=0;i<list.length();i++)
+                    {
+                        JSONObject item = (JSONObject)list.get(i);
+
+                        Log.i(TAG, "item: channename "+item.getString("channelid"));
+                        channels.add(item.getString("channelid"));
+                    }
+
+                }catch (Exception e)
+                {
+
+                }
+
+                runOnUiThread(() -> {
+                    setupChannelSelector(channels);
+                });
+
+
+
+            }
+        });
+    }
+
     private void getToken() {
-        Log.i(TAG, "test is here");
+        Log.i(TAG, "get Token is here");
         mChatManager.getToken(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -144,6 +192,16 @@ public class LoginActivity extends Activity {
         mChatManager.doLogout(null);
         mChatManager.isLogin = false;
         MessageUtil.cleanMessageListBeanList();
+    }
+
+    private void setupChannelSelector(ArrayList<String> list)
+    {
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_select, list);
+        adapter.setDropDownViewResource(R.layout.item_dropdown);
+        mChannelEditText.setAdapter(adapter);
+        mChannelEditText.setSelection(0);
+        mChannelEditText.setEnabled(true);
+        mLoginBtn.setEnabled(true);
     }
 
     private void showToast(String text) {

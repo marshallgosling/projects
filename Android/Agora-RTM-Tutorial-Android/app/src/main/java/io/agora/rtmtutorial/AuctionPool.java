@@ -6,12 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import io.agora.model.AuctionBean;
-import io.agora.rtm.RtmMessage;
 
 /**
  * Receives and manages messages from RTM engine.
  */
-public class AuctioinPool {
+public class AuctionPool {
     private Map<String, List<AuctionBean>> mOfflineAuctionMap = new HashMap<>();
 
     void insertOfflineAuction(AuctionBean auction, String channelId) {

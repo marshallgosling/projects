@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <TextView
         android:id="@+id/login_title"
         android:layout_width="match_parent"
@@ -10,13 +11,13 @@
         android:background="@color/blue"
         android:gravity="center"
         android:padding="15dp"
-        android:textColor="@color/white"
-        android:text="@string/app_name"/>
+        android:text="@string/app_name"
+        android:textColor="#FFFFFF" />
 
     <TextView
         android:id="@+id/button_login"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
+        android:layout_height="48dp"
         android:layout_centerInParent="true"
         android:background="@color/blue"
         android:clickable="true"
@@ -26,31 +27,51 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:text="@string/str_login"
-        android:textColor="@color/white" />
+        android:textColor="#FFFFFF" />
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/user_id"
+        android:layout_marginBottom="2dp"
+        android:layout_marginLeft="80dp"
+        android:layout_marginRight="80dp"
+        android:textSize="14dp"
+        android:text="User Name:" />
 
     <EditText
         android:id="@+id/user_id"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="48dp"
         android:layout_above="@+id/channel_name"
-        android:hint="@string/str_account"
         android:layout_marginLeft="80dp"
         android:layout_marginRight="80dp"
-        android:layout_marginBottom="25dp"
+        android:layout_marginBottom="35dp"
         android:background="@color/white"
+        android:hint="@string/str_account"
         android:lines="1"
         android:padding="5dp" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/channel_name"
+        android:layout_marginBottom="2dp"
+        android:layout_marginLeft="80dp"
+        android:layout_marginRight="80dp"
+        android:textSize="14dp"
+        android:text="Channel Name:" />
 
-    <EditText
+    <Spinner
         android:id="@+id/channel_name"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="48dp"
         android:layout_above="@+id/button_login"
         android:layout_marginLeft="80dp"
         android:layout_marginRight="80dp"
         android:layout_marginBottom="25dp"
         android:background="@color/white"
         android:hint="@string/hint_channel"
-        android:lines="1"
-        android:padding="5dp" />
+        android:padding="5dp"
+        android:spinnerMode="dropdown" />
 </RelativeLayout>

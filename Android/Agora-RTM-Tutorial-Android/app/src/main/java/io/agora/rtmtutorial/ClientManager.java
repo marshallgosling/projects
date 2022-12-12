@@ -155,6 +155,14 @@ public class ClientManager {
 
     }
 
+    public void getChannelNameList(Callback callback) {
+        Log.i(TAG, mContext.getString(R.string.agora_server) + "/api/v1/channels");
+
+        Request req = new Request.Builder().url(mContext.getString(R.string.agora_server) + "/api/v1/channels").build();
+
+        client.newCall(req).enqueue(callback);
+    }
+
     public void setBid(RequestBody json, Callback callback)
     {
         Request bid = new Request.Builder().url(mContext.getString(R.string.agora_server) + "/api/v1/auction/bid")
