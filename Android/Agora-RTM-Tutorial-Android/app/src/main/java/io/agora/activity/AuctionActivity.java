@@ -78,6 +78,7 @@ public class AuctionActivity extends Activity {
     private RtmChannel mRtmChannel;
 
     private RtmMetadata mMetadata;
+    private long globalRevision = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -327,19 +328,27 @@ public class AuctionActivity extends Activity {
         @Override
         public void onMetadataUpdated(RtmMetadata rtmMetadata) {
             Log.i(TAG, "onMetadataUpdated revision: " + rtmMetadata.getMajorRevision());
-            mMetadata = rtmMetadata;
 
-            getAuctionBeanFromMetedata(mMetadata.items, "auction");
+            if(rtmMetadata.getMajorRevision() > globalRevision)
+            {
+                mMetadata = rtmMetadata;
+                globalRevision = rtmMetadata.getMajorRevision();
+                getAuctionBeanFromMetedata(mMetadata.items, "auction");
 
-            runOnUiThread(() -> {
-                if (mAuctionBeanList.size() > 0) {
+                runOnUiThread(() -> {
+                    if (mAuctionBeanList.size() > 0) {
 
-                    mAucionAdapter.setItems(mAuctionBeanList);
+                        mAucionAdapter.setItems(mAuctionBeanList);
 
-                    mAucionAdapter.notifyDataSetChanged();
-                    mRecyclerView.scrollToPosition(mAuctionBeanList.size() - 1);
-                }
-            });
+                        mAucionAdapter.notifyDataSetChanged();
+                        mRecyclerView.scrollToPosition(mAuctionBeanList.size() - 1);
+                    }
+                });
+            }
+            else {
+                Log.i(TAG, "Revision is too old. Global MajorRevision: "+globalRevision);
+            }
+
         }
 
         private void getAuctionBeanFromMetedata(List<RtmMetadataItem> items, String key)
@@ -359,11 +368,6 @@ public class AuctionActivity extends Activity {
                 Log.i(TAG, "find auction:"+json);
                 Gson gson = new Gson();
                 mAuctionBeanList = gson.fromJson(json, new TypeToken<List<AuctionBean>>(){}.getType());
-
-                for(AuctionBean bean : mAuctionBeanList)
-                {
-                    Log.i(TAG, "owner:"+bean.getOwner());
-                }
             }
             else {
                 Log.i(TAG, "no auction json");
